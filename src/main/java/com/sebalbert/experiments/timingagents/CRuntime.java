@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.LogManager;
@@ -117,6 +118,7 @@ public final class CRuntime
 
         // generate envrionment and agents
         final IEnvironment l_environment = EEnvironment.from( p_cli.getOptionValue( "env", "default" ) ).generate();
+        l_environment.currentTime( Instant.now() );
 
         // global set with all possible agent actions
         final Set<IAction> l_actions = Collections.unmodifiableSet(

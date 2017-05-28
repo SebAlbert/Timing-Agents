@@ -3,6 +3,7 @@ package com.sebalbert.experiments.timingagents.environment;
 import com.sebalbert.experiments.timingagents.agents.IEnvironmentAgent;
 import org.lightjason.agentspeak.language.ILiteral;
 
+import java.time.Instant;
 import java.util.stream.Stream;
 
 
@@ -12,6 +13,21 @@ import java.util.stream.Stream;
  */
 public interface IEnvironment
 {
+
+
+    /**
+     * get the current time instant
+     * @return the current time instant
+     */
+    Instant currentTime();
+
+
+    /**
+     * set the current time
+     * @param p_currenttime the new current time
+     * @return this environment (for chaining)
+     */
+    IEnvironment currentTime( final Instant p_currenttime );
 
 
     /**
