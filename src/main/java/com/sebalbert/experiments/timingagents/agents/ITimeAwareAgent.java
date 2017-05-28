@@ -59,9 +59,9 @@ public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IE
     @IAgentActionFilter
     @IAgentActionName( name = "schedule/addgoal" )
     protected void schedule( ZonedDateTime p_datetime, String p_literal ) throws Exception {
-        Instant l_instant = p_datetime == null ? null : p_datetime.toInstant();
-        ILiteral l_literal = CLiteral.parse(p_literal);
-        ITrigger l_trigger = CTrigger.from( CTrigger.EType.ADDGOAL, l_literal );
+        final Instant l_instant = p_datetime == null ? null : p_datetime.toInstant();
+        final ILiteral l_literal = CLiteral.parse(p_literal);
+        final ITrigger l_trigger = CTrigger.from( CTrigger.EType.ADDGOAL, l_literal );
         if (l_instant != null && l_instant.compareTo( m_environment.currentTime() ) > 0) {
             synchronized (m_scheduled) {
                 m_scheduled.add( new ImmutablePair<>(l_instant, l_trigger ) );
