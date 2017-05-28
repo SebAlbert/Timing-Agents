@@ -2,6 +2,7 @@ package com.sebalbert.experiments.timingagents;
 
 import com.sebalbert.experiments.timingagents.actions.CBroadcastAction;
 import com.sebalbert.experiments.timingagents.actions.CSendAction;
+import com.sebalbert.experiments.timingagents.agents.ITimeAwareAgent;
 import com.sebalbert.experiments.timingagents.environment.EEnvironment;
 import com.sebalbert.experiments.timingagents.environment.IEnvironment;
 import com.sebalbert.experiments.timingagents.agents.EGenerator;
@@ -15,6 +16,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.lightjason.agentspeak.language.CLiteral;
+import org.lightjason.agentspeak.language.CRawTerm;
+import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
+import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
 import java.text.MessageFormat;
 import java.io.FileInputStream;
@@ -22,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,13 +100,26 @@ public final class CRuntime
         if ( l_cli.hasOption("create") && ( CRuntime.createasl() ) )
             System.exit( 0 );  
 
+        final IEnvironment l_environment = initializeEnvironment( l_cli );
 
         // execute simulation
         CRuntime.execute(
-            CRuntime.initialize( l_cli ),
+            CRuntime.initializeAgents( l_cli, l_environment ),
+            l_environment,
             l_cli.hasOption( "steps" ) ? Integer.parseInt( l_cli.getOptionValue( "steps" ) ) : Integer.MAX_VALUE,
             !l_cli.hasOption( "sequential" )
         );       
+    }
+
+    /**
+     * initialize the environment for the agents
+     * @param p_cli command-line parameter
+     * @return environment
+     */
+    private static IEnvironment initializeEnvironment( final CommandLine p_cli ) {
+        final IEnvironment l_environment = EEnvironment.from( p_cli.getOptionValue( "env", "default" ) ).generate();
+        l_environment.currentTime( Instant.now() );
+        return l_environment;
     }
 
     /**
@@ -109,16 +128,15 @@ public final class CRuntime
      * collection with agents for execution
      *
      * @param p_cli command-line parameter
+     * @param p_environment environment for the agents
      * @return collection with agents for execution
      */
-    private static Collection<IAgent<?>> initialize( final CommandLine p_cli )
+    private static Collection<IAgent<?>> initializeAgents( final CommandLine p_cli, final IEnvironment p_environment )
     {
         // runtime agent collection
         final Map<String, IAgent<?>> l_agents = new ConcurrentHashMap<>();
 
         // generate envrionment and agents
-        final IEnvironment l_environment = EEnvironment.from( p_cli.getOptionValue( "env", "default" ) ).generate();
-        l_environment.currentTime( Instant.now() );
 
         // global set with all possible agent actions
         final Set<IAction> l_actions = Collections.unmodifiableSet(
@@ -164,7 +182,7 @@ public final class CRuntime
                                             final FileInputStream l_stream = new FileInputStream( i.getValue() );
                                     )
                             {
-                                return i.getKey().generate( l_stream, l_environment, l_actions.stream(), l_agents );
+                                return i.getKey().generate( l_stream, p_environment, l_actions.stream(), l_agents );
                             }
                             catch ( final Exception l_exception )
                             {
@@ -195,7 +213,8 @@ public final class CRuntime
      * @param p_steps number of simulation steps
      * @param p_parallel run agents in parallel
      */
-    private static void execute( final Collection<IAgent<?>> p_agents, final int p_steps, final boolean p_parallel )
+    private static void execute( final Collection<IAgent<?>> p_agents, final IEnvironment p_environment,
+                                 final int p_steps, final boolean p_parallel )
     {
             if ( p_agents.size() == 0 )
             {
@@ -203,8 +222,28 @@ public final class CRuntime
                 System.exit( -1 );
             }
 
-            IntStream.range( 0, p_steps )
-                 .forEach( i -> CRuntime.optionalparallelstream( p_agents.stream(), p_parallel ).forEach( CRuntime::execute ) );
+            int l_step = 0;
+            while( l_step < p_steps ) {
+                do {
+                    System.out.println("STEP " + l_step);
+                    CRuntime.optionalparallelstream( p_agents.stream(), p_parallel ).forEach( CRuntime::execute );
+                } while( l_step++ < p_steps &&
+                        p_agents.parallelStream().filter( a -> a instanceof ITimeAwareAgent<?> )
+                                .map( a -> (ITimeAwareAgent) a )
+                                .anyMatch( a -> a.nextActivation().equals( p_environment.currentTime() ) )
+                        );
+                // advance the simulated time
+                Instant l_nexttime =
+                        p_agents.parallelStream().filter( a -> a instanceof ITimeAwareAgent<?> )
+                                .map( a -> (ITimeAwareAgent) a ).map( ITimeAwareAgent::nextActivation )
+                                .min( Instant::compareTo ).orElse( Instant.MAX );
+                Duration l_timeadvance = Duration.between( p_environment.currentTime(), l_nexttime );
+                p_environment.currentTime( l_nexttime );
+                ITrigger l_trigger = CTrigger.from( CTrigger.EType.ADDGOAL,
+                        CLiteral.from( "simtime/advance", CRawTerm.from( l_timeadvance) ) );
+                p_agents.parallelStream().forEach( a -> a.trigger( l_trigger, false ));
+                System.out.println("SIMULATED TIME ADVANCED BY " + l_timeadvance + " TO " + l_nexttime);
+            }
 
     }
 
@@ -259,7 +298,7 @@ public final class CRuntime
         l_clioptions.addOption( "steps", true, "number of simulation steps [default: integer maximum]" );
 
 
-        // --- process CLI arguments and initialize configuration ----------------------------------------------------------------------------------------------
+        // --- process CLI arguments and initializeAgents configuration ----------------------------------------------------------------------------------------------
         final CommandLine l_cli;
         try
         {
