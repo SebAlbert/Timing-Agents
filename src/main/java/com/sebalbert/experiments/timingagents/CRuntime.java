@@ -99,7 +99,7 @@ public final class CRuntime
         CRuntime.execute(
             CRuntime.initialize( l_cli ),
             l_cli.hasOption( "steps" ) ? Integer.parseInt( l_cli.getOptionValue( "steps" ) ) : Integer.MAX_VALUE,
-            l_cli.hasOption( "sequential" )
+            !l_cli.hasOption( "sequential" )
         );       
     }
 
