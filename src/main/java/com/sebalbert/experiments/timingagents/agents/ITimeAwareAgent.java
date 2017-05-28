@@ -14,6 +14,7 @@ import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 
@@ -37,7 +38,7 @@ public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IE
 
 
     private final PriorityQueue<ImmutablePair<Instant, ITrigger>> m_scheduled = new PriorityQueue<>(
-            (o1, o2) -> o1.getLeft().compareTo( o2.getLeft() ) );
+            Comparator.comparing(ImmutablePair::getLeft));
 
     /**
      * ctor
