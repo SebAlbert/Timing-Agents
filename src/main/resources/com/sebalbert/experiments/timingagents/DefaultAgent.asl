@@ -5,7 +5,7 @@
 +!main <-
     generic/print( "initial plan" );
 
-    !test;
+    !test( 0 );
 
     NumberData = 1;
     StringData = "FooBar";
@@ -20,8 +20,8 @@
     generic/print( "receive message", M, "from", F )
 .
 
-+!test <-
-    generic/print( "test" );
++!test( X ) <-
+    generic/print( "test", X );
     D = simtime/current();
     generic/print( D );
     DT = datetime/create( D );
@@ -29,7 +29,14 @@
     N = datetime/applyseconds("plus", 5, DT);
     generic/print( N );
     generic/print ( schedule/length );
-    schedule/addgoal( N, "test" );
+    Y = X + 1;
+    S = string/concat( "test( ", generic/type/tostring( Y ), ")" );
+    schedule/addgoal( N, S );
     generic/print( "added" );
     generic/print ( schedule/length )
+.
+
++!simtime/advance( T ) <-
+    generic/print( "Agent detected advance of time by ", T );
+    schedule/consume
 .

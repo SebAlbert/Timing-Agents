@@ -80,6 +80,18 @@ public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IE
         }
     }
 
+    /**
+     * realise (and remove) scheduled triggers for current instant
+     */
+    @IAgentActionFilter
+    @IAgentActionName( name = "schedule/consume" )
+    protected void consumeSchedule() {
+        final Instant l_currenttime = m_environment.currentTime();
+        synchronized (m_scheduled) {
+            while (m_scheduled.peek().getLeft().equals( l_currenttime ))
+                this.trigger( m_scheduled.poll().getRight(), false );
+        }
+    }
 
     /**
      * Get the next time this agent will become active
