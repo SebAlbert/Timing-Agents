@@ -1,21 +1,14 @@
 package com.sebalbert.experiments.timingagents.agents;
 
 import com.sebalbert.experiments.timingagents.environment.IEnvironment;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
-import org.lightjason.agentspeak.language.CLiteral;
-import org.lightjason.agentspeak.language.ILiteral;
-import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
-import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 
 
 /**
