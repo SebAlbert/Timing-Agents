@@ -67,7 +67,7 @@ public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IE
     @IAgentActionName( name = "nextactivation/set" )
     protected void setNextActivation( ZonedDateTime p_datetime ) throws Exception {
         if ( p_datetime == null ) throw new IllegalArgumentException( "next activation time must not be null" );
-        final Instant l_instant = p_datetime == null ? null : p_datetime.toInstant();
+        final Instant l_instant = p_datetime.toInstant();
         if ( l_instant.compareTo( m_environment.currentTime() ) <= 0 )
             throw new IllegalArgumentException( "next activation time must be in the future" );
         m_nextactivation = l_instant;
