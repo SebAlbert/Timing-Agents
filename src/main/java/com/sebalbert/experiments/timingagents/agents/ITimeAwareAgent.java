@@ -37,8 +37,8 @@ import java.util.PriorityQueue;
 public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IEnvironmentAgent<T> {
 
 
-    private final PriorityQueue<ImmutablePair<Instant, ITrigger>> m_scheduled = new PriorityQueue<>(
-            Comparator.comparing(ImmutablePair::getLeft));
+    private Instant m_nextactivation = Instant.MAX;
+    private ZoneId m_timezone = ZoneId.systemDefault();
 
     /**
      * ctor
@@ -54,43 +54,23 @@ public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IE
     @IAgentActionFilter
     @IAgentActionName( name = "simtime/current" )
     protected ZonedDateTime currentTime() {
-        return m_environment.currentTime().atZone( ZoneId.systemDefault() );
+        return m_environment.currentTime().atZone( m_timezone );
     }
 
     @IAgentActionFilter
-    @IAgentActionName( name = "schedule/addgoal" )
-    protected void schedule( ZonedDateTime p_datetime, String p_literal ) throws Exception {
+    @IAgentActionName( name = "nextactivation/get" )
+    protected ZonedDateTime getNextActivation() {
+        return m_nextactivation.atZone( m_timezone );
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "nextactivation/set" )
+    protected void setNextActivation( ZonedDateTime p_datetime ) throws Exception {
+        if ( p_datetime == null ) throw new IllegalArgumentException( "next activation time must not be null" );
         final Instant l_instant = p_datetime == null ? null : p_datetime.toInstant();
-        final ILiteral l_literal = CLiteral.parse(p_literal);
-        final ITrigger l_trigger = CTrigger.from( CTrigger.EType.ADDGOAL, l_literal );
-        if (l_instant != null && l_instant.compareTo( m_environment.currentTime() ) > 0) {
-            synchronized (m_scheduled) {
-                m_scheduled.add( new ImmutablePair<>(l_instant, l_trigger ) );
-            }
-        } else {
-            this.trigger( l_trigger, false );
-        }
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "schedule/length" )
-    protected int scheduleLength() {
-        synchronized (m_scheduled) {
-            return m_scheduled.size();
-        }
-    }
-
-    /**
-     * realise (and remove) scheduled triggers for current instant
-     */
-    @IAgentActionFilter
-    @IAgentActionName( name = "schedule/consume" )
-    protected void consumeSchedule() {
-        final Instant l_currenttime = m_environment.currentTime();
-        synchronized (m_scheduled) {
-            while (m_scheduled.peek().getLeft().equals( l_currenttime ))
-                this.trigger( m_scheduled.poll().getRight(), false );
-        }
+        if ( l_instant.compareTo( m_environment.currentTime() ) <= 0 )
+            throw new IllegalArgumentException( "next activation time must be in the future" );
+        m_nextactivation = l_instant;
     }
 
     /**
@@ -99,8 +79,7 @@ public abstract class ITimeAwareAgent<T extends IEnvironmentAgent<?>> extends IE
      */
     public Instant nextActivation() {
         if (!runningplans().isEmpty()) return m_environment.currentTime();
-        if (m_scheduled.size() < 1) return Instant.MAX;
-        return m_scheduled.peek().getLeft();
+        return m_nextactivation;
     }
 
 }
