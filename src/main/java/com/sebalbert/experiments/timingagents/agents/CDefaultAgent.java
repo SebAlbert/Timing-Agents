@@ -6,7 +6,6 @@ import org.lightjason.agentspeak.action.IAction;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.common.CCommon;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
-import org.lightjason.agentspeak.language.score.IAggregation;
 
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -18,7 +17,7 @@ import java.util.stream.Stream;
  * a type of agent
  */
 
-public final class CDefaultAgent extends ITimeAwareAgent<CDefaultAgent>
+public final class CDefaultAgent extends IEnvironmentAgent<CDefaultAgent>
 {
 
     /**
@@ -35,7 +34,7 @@ public final class CDefaultAgent extends ITimeAwareAgent<CDefaultAgent>
 
 
 
-        /**
+    /**
      * generator of a specified type of agents
      */
     public static final class CGenerator extends IGenerator<CDefaultAgent>
@@ -51,7 +50,7 @@ public final class CDefaultAgent extends ITimeAwareAgent<CDefaultAgent>
          */
         public CGenerator(final InputStream p_stream, final Stream<IAction> p_defaultaction, final IEnvironment p_environment, final Map<String, IAgent<?>> p_agents ) throws Exception
         {
-            super(p_stream, Stream.concat( p_defaultaction, CCommon.actionsFromAgentClass( CDefaultAgent.class ) ), IAggregation.EMPTY, p_environment, p_agents );
+            super(p_stream, Stream.concat( p_defaultaction, CCommon.actionsFromAgentClass( CDefaultAgent.class ) ), p_environment, p_agents );
         }
 
         @Override

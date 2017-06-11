@@ -11,8 +11,8 @@ import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
 import org.lightjason.agentspeak.language.ITerm;
 import org.lightjason.agentspeak.language.execution.IContext;
-import org.lightjason.agentspeak.language.execution.fuzzy.CFuzzyValue;
-import org.lightjason.agentspeak.language.execution.fuzzy.IFuzzyValue;
+import org.lightjason.agentspeak.language.fuzzy.CFuzzyValue;
+import org.lightjason.agentspeak.language.fuzzy.IFuzzyValue;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
@@ -67,14 +67,14 @@ public final class CSendAction extends IBaseAction
 
         final ITerm l_sender = CLiteral.from( "from", CRawTerm.from( p_context.agent().<IEnvironmentAgent<?>>raw().name() ) );
         l_arguments.stream()
-                   .skip( 1 )
-                   .map( ITerm::raw )
-                   .map( CRawTerm::from )
-                   .map( i -> CTrigger.from(
-                                ITrigger.EType.ADDGOAL,
-                                CLiteral.from( "message/receive", CLiteral.from( "message", i ), l_sender )
-                   ) )
-                   .forEach( i -> l_receiver.trigger( i ) );
+                .skip( 1 )
+                .map( ITerm::raw )
+                .map( CRawTerm::from )
+                .map( i -> CTrigger.from(
+                        ITrigger.EType.ADDGOAL,
+                        CLiteral.from( "message/receive", CLiteral.from( "message", i ), l_sender )
+                ) )
+                .forEach( i -> l_receiver.trigger( i ) );
 
         return CFuzzyValue.from( true );
     }

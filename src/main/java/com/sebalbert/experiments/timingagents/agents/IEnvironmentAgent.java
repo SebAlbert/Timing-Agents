@@ -12,7 +12,6 @@ import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
 import org.lightjason.agentspeak.language.ILiteral;
 import org.lightjason.agentspeak.language.execution.IVariableBuilder;
-import org.lightjason.agentspeak.language.score.IAggregation;
 
 import com.sebalbert.experiments.timingagents.environment.IEnvironment;
 
@@ -39,7 +38,7 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
     /**
      * agent name
      */
-    private final String m_name;    
+    private final String m_name;
 
     /**
      * ctor
@@ -67,14 +66,14 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
      */
     public Stream<ILiteral> literal( final IEnvironmentAgent<?> p_agent )
     {
-        return Stream.of( 
-                CLiteral.from( "agent", 
-                               CLiteral.from( "name", CRawTerm.from( m_name ) ) 
-                ) 
+        return Stream.of(
+                CLiteral.from( "agent",
+                        CLiteral.from( "name", CRawTerm.from( m_name ) )
+                )
         );
     }
 
-        /**
+    /**
      * returns the agent name
      *
      * @return agent name
@@ -117,16 +116,16 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
         public final Collection<ILiteral> literal( final String p_key )
         {
             return m_environment.literal( IEnvironmentAgent.this )
-                                .filter(i -> p_key.equals( i.functor() ) )
-                                .collect( Collectors.toSet() );
+                    .filter(i -> p_key.equals( i.functor() ) )
+                    .collect( Collectors.toSet() );
         }
 
         @Override
         public final boolean empty()
         {
             return !m_environment.literal( IEnvironmentAgent.this )
-                                 .findFirst()
-                                 .isPresent();
+                    .findFirst()
+                    .isPresent();
         }
 
         @Override
@@ -139,7 +138,7 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
         public final boolean containsLiteral( final String p_key)
         {
             return m_environment.literal( IEnvironmentAgent.this )
-                                .anyMatch(i -> p_key.equals( i.functor() ) );
+                    .anyMatch(i -> p_key.equals( i.functor() ) );
         }
 
     }
@@ -172,21 +171,18 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
          *
          * @param p_stream ASL input stream
          * @param p_actions action stream
-         * @param p_aggregation aggregation function
          * @param p_environment environment reference
          * @param p_agents agent map
          * @throws Exception on any error
          */
         protected IGenerator( final InputStream p_stream, final Stream<IAction> p_actions,
-                              final IAggregation p_aggregation, final IEnvironment p_environment,
-                              final Map<String, IAgent<?>> p_agents ) throws Exception
+                              final IEnvironment p_environment, final Map<String, IAgent<?>> p_agents ) throws Exception
         {
             super( p_stream,
-                   Stream.concat(
-                       CCommon.actionsFromAgentClass( IEnvironmentAgent.class ),
-                       p_actions
-                   ).collect(Collectors.toSet() ),
-                   p_aggregation
+                    Stream.concat(
+                            CCommon.actionsFromAgentClass( IEnvironmentAgent.class ),
+                            p_actions
+                    ).collect(Collectors.toSet() )
             );
 
             m_agents = p_agents;
@@ -199,24 +195,22 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
          *
          * @param p_stream ASL input stream
          * @param p_actions action stream
-         * @param p_aggregation aggregation function
          * @param p_variablebuilder variable builder
          * @param p_environment environment reference
          * @param p_agents agent map
          * @throws Exception on any error
          */
         protected IGenerator( final InputStream p_stream, final Stream<IAction> p_actions,
-                              final IAggregation p_aggregation, final IVariableBuilder p_variablebuilder,
-                              final IEnvironment p_environment, final Map<String, IAgent<?>> p_agents )
-        throws Exception
+                              final IVariableBuilder p_variablebuilder, final IEnvironment p_environment,
+                              final Map<String, IAgent<?>> p_agents )
+                throws Exception
         {
             super( p_stream,
-                   Stream.concat(
-                       CCommon.actionsFromAgentClass( IEnvironmentAgent.class ),
-                       p_actions
-                   ).collect(Collectors.toSet() ),
-                   p_aggregation,
-                   p_variablebuilder
+                    Stream.concat(
+                            CCommon.actionsFromAgentClass( IEnvironmentAgent.class ),
+                            p_actions
+                    ).collect(Collectors.toSet() ),
+                    p_variablebuilder
             );
 
             m_agents = p_agents;
@@ -229,7 +223,6 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
          *
          * @param p_stream ASL input stream
          * @param p_actions action stream
-         * @param p_aggregation aggregation function
          * @param p_planbundle planbundles
          * @param p_variablebuilder variable builder
          * @param p_environment environment reference
@@ -237,18 +230,16 @@ public abstract class IEnvironmentAgent<T extends IEnvironmentAgent<?>> extends 
          * @throws Exception on any error
          */
         protected IGenerator( final InputStream p_stream, final Stream<IAction> p_actions,
-                              final IAggregation p_aggregation, final Set<IPlanBundle> p_planbundle,
-                              final IVariableBuilder p_variablebuilder, final IEnvironment p_environment,
-                              final Map<String, IAgent<?>> p_agents ) throws Exception
+                              final Set<IPlanBundle> p_planbundle, final IVariableBuilder p_variablebuilder,
+                              final IEnvironment p_environment, final Map<String, IAgent<?>> p_agents ) throws Exception
         {
             super( p_stream,
-                   Stream.concat(
-                       CCommon.actionsFromAgentClass( IEnvironmentAgent.class ),
-                       p_actions
-                   ).collect(Collectors.toSet() ),
-                   p_aggregation,
-                   p_planbundle,
-                   p_variablebuilder
+                    Stream.concat(
+                            CCommon.actionsFromAgentClass( IEnvironmentAgent.class ),
+                            p_actions
+                    ).collect(Collectors.toSet() ),
+                    p_planbundle,
+                    p_variablebuilder
             );
 
             m_agents = p_agents;
