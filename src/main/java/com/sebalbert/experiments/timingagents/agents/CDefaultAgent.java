@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  * a type of agent
  */
 
-public final class CDefaultAgent extends IEnvironmentAgent<CDefaultAgent>
+public final class CDefaultAgent extends ITimeAwareAgent<CDefaultAgent>
 {
 
     /**
